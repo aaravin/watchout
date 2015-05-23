@@ -1,9 +1,9 @@
 // start slingin' some d3 here.
 
 var gameOptions = {
-  height: 450,
-  width: 700,
-  numberOfEnemies: 3,
+  height: 500,
+  width: 500,
+  numberOfEnemies: 30,
   playerRadius: 10
 };
 
@@ -33,7 +33,13 @@ for (var i = 0; i < gameOptions.numberOfEnemies; i++) {
     .attr('r', 10);
 }
 
+var currentScore = d3.select('.current').select('span');
+var highScore = d3.select('.high').select('span');
+
 setInterval(function() {
+  highScore.text(scores.highScore);
+  currentScore.text(scores.currentScore);
+  scores.currentScore += 10;
   var randomX = 0;
   var randomY = 0;
   d3.selectAll('.enemy')
@@ -80,8 +86,8 @@ function dragmove(d) {
     y = gameOptions.height - player.radius;
   }
   d3.select(this).attr("transform", "translate(" + x + "," + y + ")");
-  this.x = x;
-  this.y = y;
+  player.x = x;
+  player.y = y;
 }
 
 // add player
@@ -105,10 +111,13 @@ checkCollision = function(enemy, collidedCallback) {
 };
 
 onCollision = function() {
+
   console.log('collision occurred!!!!!');
-  // updateBestScore();
-  // gameStats.score = 0;
-  // return updateScore();
+  if (scores.currentScore > scores.highScore) {
+    scores.highScore = scores.currentScore;
+  }
+  scores.currentScore = 0;
+
 };
 
 
