@@ -3,7 +3,7 @@
 var gameOptions = {
   height: 450,
   width: 700,
-  numberOfEnemies: 30,
+  numberOfEnemies: 3,
   playerRadius: 10
 };
 
@@ -16,6 +16,13 @@ var gameSpace = d3.select('body').append('svg')
   .attr('width', gameOptions.width)
   .attr('height', gameOptions.height);
 
+// enemies = [];
+
+// var Enemy = function(x, y) {
+//   this.x;
+//   this.y;
+// };
+
 for (var i = 0; i < gameOptions.numberOfEnemies; i++) {
   var x = Math.random() * gameOptions.width;
   var y = Math.random() * gameOptions.height;
@@ -27,15 +34,24 @@ for (var i = 0; i < gameOptions.numberOfEnemies; i++) {
 }
 
 setInterval(function() {
+  var randomX = 0;
+  var randomY = 0;
   d3.selectAll('.enemy')
     .transition()
     .attr('cx', function() {
-      return Math.random() * gameOptions.width;
+      randomX = Math.random() * gameOptions.width;
+      return randomX;
     })
+    .attr('data-newx', randomX)
     .attr('cy', function() {
-      return Math.random() * gameOptions.height;
+      randomY = Math.random() * gameOptions.height;
+      return randomY;
     })
-    .duration(1000);
+    .attr('data-newy', randomY)
+    .duration(1000)
+    // .transition()
+    // .duration(2000)
+    .tween('custom', tweenWithCollisionDetection);
 }, 2000);
 
 var player = {
@@ -68,6 +84,7 @@ function dragmove(d) {
   this.y = y;
 }
 
+// add player
 gameSpace.append('circle')
   .attr('cx', 0)
   .attr('cy', 0)
@@ -76,8 +93,47 @@ gameSpace.append('circle')
   .attr('transform', 'translate(' + player.x + ',' + player.y + ')')
   .call(drag);
 
+checkCollision = function(enemy, collidedCallback) {
+  var radiusSum, separation, xDiff, yDiff;
+  radiusSum = parseFloat(enemy.attr('r')) + player.radius;
+  xDiff = parseFloat(enemy.attr('cx')) - player.x;
+  yDiff = parseFloat(enemy.attr('cy')) - player.y;
+  separation = Math.sqrt(Math.pow(xDiff, 2) + Math.pow(yDiff, 2));
+  if (separation < radiusSum) {
+    return collidedCallback(player, enemy);
+  }
+};
+
+onCollision = function() {
+  console.log('collision occurred!!!!!');
+  // updateBestScore();
+  // gameStats.score = 0;
+  // return updateScore();
+};
 
 
+tweenWithCollisionDetection = function(endData) {
+  var endPos, enemy, startPos;
+  enemy = d3.select(this);
+  startPos = {
+    x: parseFloat(enemy.attr('cx')),
+    y: parseFloat(enemy.attr('cy'))
+  };
+  endPos = {
+    x: parseFloat(enemy.attr('data-newx')),
+    y: parseFloat(enemy.attr('data-newy'))
+  };
+  return function(t) {
+    var enemyNextPos;
+    checkCollision(enemy, onCollision);
+    enemyNextPos = {
+      x: startPos.x + (endPos.x - startPos.x) * t,
+      y: startPos.y + (endPos.y - startPos.y) * t
+    };
+    return enemy.attr('cx', enemyNextPos.x).attr('cy', enemyNextPos.y);
+  };
+};
+// return enemies.transition().duration(500).attr('r', 10)
 
 
 
