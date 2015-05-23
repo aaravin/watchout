@@ -36,6 +36,8 @@ for (var i = 0; i < gameOptions.numberOfEnemies; i++) {
     .attr('class', 'enemy')
     .attr('cx', x)
     .attr('cy', y)
+    .attr('data-newx', x)
+    .attr('data-newy', y)
     .attr('r', 10);
 }
 
@@ -144,6 +146,7 @@ tweenWithCollisionDetection = function(endData) {
       x: startPos.x + (endPos.x - startPos.x) * t,
       y: startPos.y + (endPos.y - startPos.y) * t
     };
+    // console.log(enemyNextPos);
     return enemy.attr('cx', enemyNextPos.x).attr('cy', enemyNextPos.y);
   };
 };
